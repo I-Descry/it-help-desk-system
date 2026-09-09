@@ -55,4 +55,20 @@ The chosen format keeps things simple: the year is just a label, refreshed autom
 
 ## Why two IT staff aren't in a separate list
 
-At a team size of two primary staff (plus one specialist and one manager for escalation), maintaining a full `IT Staff` SharePoint list would be unnecessary overhead. Staff are referenced directly by email inside the Power Automate flow. This is a candidate to revisit if the team grows.
+At this team size, maintaining a full `IT Staff` SharePoint list would be unnecessary overhead. Staff are referenced directly by email inside the Power Automate flow. This is a candidate to revisit if the team grows.
+
+## Assignment pool and availability
+
+The assignable roles are: 1 Manager (Charles), 1 Specialist (Nikko), 2 Assistants (Tristan, JP). Two pools apply, not one:
+
+- **Manual mode**: the Manager (or whoever's currently the approver — see below) can assign a ticket to the Specialist or either Assistant — a pool of 3.
+- **Auto mode**: round-robins strictly between the 2 Assistants. The Specialist is deliberately excluded from auto-assignment — he only receives tickets via a direct manual choice or an escalation, never blind rotation, since escalation-worthy technical judgment shouldn't be handed out at random.
+
+**Who approves in Manual mode** is itself a `Ticket Settings` field (`ManualAssignmentApprover`) rather than hardcoded to the Manager in the flow. This solves manager absence with no flow changes: if Charles is on leave, he (or anyone) just changes that field to Nikko, and the Teams card starts going to the Specialist instead.
+
+**Staff absence** (Specialist or an Assistant out) is handled the same way, via `Ticket Settings.OutOfOffice` (a multi-select Person field). Manual mode still shows all 3 candidates on the Teams card, but the card body also lists who's currently out, so the approver isn't guessing. Auto mode skips anyone in this list when choosing the next Assistant; if both Assistants are out, it falls back to notifying the Manager directly, since he's willing to take a ticket himself if needed.
+
+**Workload balancing** (should Auto mode avoid assigning to someone who already has an open ticket) came down to a choice between two behaviors:
+
+- *Hard block* — never assign to someone with an open ticket (`Status = Assigned` or `In Progress`), no exceptions. Rejected: if both Assistants happen to have something open at the same time, a new ticket would have nowhere to go automatically.
+- *Soft preference* — prefer whichever Assistant currently has fewer open tickets, but fall back to normal round-robin (via `LastAssignedTo`) if they're tied or both busy. **This is what's built.** Every ticket is always assigned to someone immediately; at worst, someone ends up with two open tickets instead of one, which they can prioritize themselves using the ticket's `Priority` field. The Manager's per-ticket FYI card in Auto mode is the safety valve if this ever creates a real imbalance — he can reassign manually.

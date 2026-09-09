@@ -68,10 +68,19 @@ Holds exactly one row, controlling the assignment logic.
 |---|---|---|
 | `Title` | Single line of text (default) | Not functionally used; set to `Default` |
 | `AssignmentMode` | Choice — `Manual`, `Auto` | Default `Manual` |
-| `LastAssignedTo` | Person (single) | Tracks round-robin state in Auto mode |
+| `LastAssignedTo` | Person (single) | Tracks round-robin state in Auto mode. Rotates between the 2 IT Assistants only — the Specialist is never part of auto-assignment. See [`decisions.md`](./decisions.md#assignment-pool-and-availability). |
+| `ManualAssignmentApprover` | Person (single) | Who receives the Teams adaptive card in Manual mode. Defaults to the IT and Project Assistant Manager; changeable by anyone (e.g. to the Specialist) when the Manager is unavailable — no flow edit required. |
+| `OutOfOffice` | Person (allow multiple selection) | Anyone among the Specialist + 2 Assistants currently unavailable. Shown as an FYI on the Manual-mode card; skipped when picking who's next in Auto mode. |
 
 `AssignmentMode` colors: `Manual` `#455A64`, `Auto` `#00897B`.
 
 ## Staff reference (not a list — referenced directly in Power Automate)
 
-At this team size (2 primary IT staff), staff emails are referenced directly inside the Power Automate flow rather than maintained in a separate SharePoint list. If the team grows meaningfully, a dedicated `IT Staff` list would be the natural next step.
+At this team size, staff emails are referenced directly inside the Power Automate flow rather than maintained in a separate SharePoint list. If the team grows meaningfully, a dedicated `IT Staff` list would be the natural next step.
+
+| Role | Name | Email | Assignment pool |
+|---|---|---|---|
+| IT and Project Assistant Manager | Charles Caldito Jr. | `charles.caldito@nabatifood.com.ph` | Manual-mode approver (default); can assign to anyone, including himself; escalation target |
+| IT Specialist | John Nikko Alvarez | `johnnikko.alvarez@nabatifood.com.ph` | Manual assignment only (Manager's choice), or via escalation — never auto-assigned |
+| IT Assistant | Tristan Railey Tan | `tristan.tan@nabatifood.com.ph` | Manual or Auto (round-robin pool of 2) |
+| IT Assistant | John Paul Villacorta | `jp.villacorta@nabatifood.com.ph` | Manual or Auto (round-robin pool of 2) |
