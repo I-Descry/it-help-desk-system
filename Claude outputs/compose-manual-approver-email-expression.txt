@@ -1,0 +1,1 @@
+coalesce(items('Apply_to_each')?['ActingApprover']?['Email'], items('Apply_to_each')?['ManualAssignmentApprover']?['Email'])

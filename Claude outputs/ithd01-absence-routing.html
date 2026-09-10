@@ -1,0 +1,458 @@
+<title>Ticket Routing & Absence Flow</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+:root{
+  --paper:#F1F3F0;
+  --surface:#FFFFFF;
+  --ink:#171F1D;
+  --ink-soft:#4B5652;
+  --ink-faint:#7C8783;
+  --border:#D7DCD7;
+  --flow:#1B6E63;
+  --flow-soft:#E3EFEB;
+  --escalation:#A8641F;
+  --escalation-soft:#F5E7D5;
+  --mono-chip:#E9ECE8;
+  --shadow: 0 1px 2px rgba(23,31,29,0.06), 0 4px 14px rgba(23,31,29,0.05);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#101513;
+    --surface:#17201D;
+    --ink:#E8ECE9;
+    --ink-soft:#A7B2AD;
+    --ink-faint:#748079;
+    --border:#293330;
+    --flow:#54C9B9;
+    --flow-soft:#17332E;
+    --escalation:#E2A25A;
+    --escalation-soft:#382712;
+    --mono-chip:#1D2622;
+    --shadow: 0 1px 2px rgba(0,0,0,0.4), 0 8px 24px rgba(0,0,0,0.35);
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#101513;
+  --surface:#17201D;
+  --ink:#E8ECE9;
+  --ink-soft:#A7B2AD;
+  --ink-faint:#748079;
+  --border:#293330;
+  --flow:#54C9B9;
+  --flow-soft:#17332E;
+  --escalation:#E2A25A;
+  --escalation-soft:#382712;
+  --mono-chip:#1D2622;
+  --shadow: 0 1px 2px rgba(0,0,0,0.4), 0 8px 24px rgba(0,0,0,0.35);
+}
+
+*{box-sizing:border-box;}
+body{
+  background:var(--paper);
+  color:var(--ink);
+  font-family:'IBM Plex Sans', -apple-system, 'Segoe UI', sans-serif;
+  padding-block:56px;
+  padding-inline:20px;
+}
+.page{
+  max-width:900px;
+  margin:0 auto;
+}
+.eyebrow{
+  font-family:'IBM Plex Mono', ui-monospace, monospace;
+  font-size:12px;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  color:var(--flow);
+  font-weight:600;
+  margin:0 0 14px;
+}
+h1{
+  font-size:clamp(28px,4vw,38px);
+  line-height:1.15;
+  font-weight:700;
+  margin:0 0 12px;
+  text-wrap:balance;
+  letter-spacing:-0.01em;
+}
+.subhead{
+  font-size:16px;
+  line-height:1.55;
+  color:var(--ink-soft);
+  max-width:62ch;
+  margin:0 0 40px;
+}
+.meta-row{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-bottom:8px;
+}
+.pill{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  font-family:'IBM Plex Mono', monospace;
+  font-size:11.5px;
+  padding:4px 10px;
+  border-radius:100px;
+  background:var(--mono-chip);
+  color:var(--ink-soft);
+  border:1px solid var(--border);
+}
+.pill.status-done::before{content:"●"; color:var(--flow); font-size:9px;}
+.pill.status-progress::before{content:"●"; color:var(--escalation); font-size:9px;}
+
+figure{margin:0 0 56px;}
+.diagram-scroll{
+  overflow-x:auto;
+  border:1px solid var(--border);
+  border-radius:14px;
+  background:var(--surface);
+  box-shadow:var(--shadow);
+  padding:8px;
+}
+.diagram-scroll svg{
+  display:block;
+  min-width:920px;
+  width:100%;
+  height:auto;
+}
+figcaption{
+  margin-top:14px;
+  font-size:13.5px;
+  color:var(--ink-faint);
+  line-height:1.5;
+  max-width:66ch;
+}
+
+.section-title{
+  font-size:13px;
+  font-weight:600;
+  text-transform:uppercase;
+  letter-spacing:0.06em;
+  color:var(--ink-faint);
+  margin:0 0 18px;
+}
+
+.settings-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:18px;
+  margin-bottom:52px;
+}
+@media (max-width:640px){
+  .settings-grid{grid-template-columns:1fr;}
+}
+.setting-card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:22px 22px 24px;
+  box-shadow:var(--shadow);
+}
+.setting-card .field{
+  font-family:'IBM Plex Mono', monospace;
+  font-size:13px;
+  font-weight:600;
+  color:var(--flow);
+  background:var(--flow-soft);
+  display:inline-block;
+  padding:3px 9px;
+  border-radius:6px;
+  margin-bottom:12px;
+}
+.setting-card h3{
+  font-size:16px;
+  margin:0 0 8px;
+  font-weight:600;
+}
+.setting-card p{
+  font-size:14px;
+  line-height:1.6;
+  color:var(--ink-soft);
+  margin:0 0 10px;
+}
+.setting-card .who{
+  font-size:12.5px;
+  color:var(--ink-faint);
+  border-top:1px solid var(--border);
+  padding-top:10px;
+  margin-top:14px;
+}
+.setting-card .who b{color:var(--ink-soft); font-weight:600;}
+
+.covered-list{
+  display:flex;
+  flex-direction:column;
+  gap:0;
+  border-top:1px solid var(--border);
+  margin-bottom:52px;
+}
+.covered-item{
+  display:grid;
+  grid-template-columns:180px 1fr;
+  gap:20px;
+  padding:16px 0;
+  border-bottom:1px solid var(--border);
+}
+@media (max-width:640px){
+  .covered-item{grid-template-columns:1fr; gap:6px;}
+}
+.covered-item .who{
+  font-size:13.5px;
+  font-weight:600;
+  color:var(--ink);
+}
+.covered-item .what{
+  font-size:14px;
+  line-height:1.6;
+  color:var(--ink-soft);
+}
+
+footer{
+  font-size:12.5px;
+  color:var(--ink-faint);
+  border-top:1px solid var(--border);
+  padding-top:18px;
+  line-height:1.6;
+}
+footer code{
+  font-family:'IBM Plex Mono', monospace;
+  background:var(--mono-chip);
+  padding:1px 6px;
+  border-radius:4px;
+  color:var(--ink-soft);
+}
+
+svg text{
+  font-family:'IBM Plex Sans', sans-serif;
+  fill:var(--ink);
+}
+svg .diamond-text, svg .box-text{font-size:14px; font-weight:500;}
+svg .small-label{font-family:'IBM Plex Mono', monospace; font-size:11.5px; font-weight:500;}
+svg .end-text{font-size:12.5px; fill:var(--ink-faint); font-style:italic;}
+svg .lane-label{font-family:'IBM Plex Mono', monospace; font-size:12px; font-weight:600; letter-spacing:0.04em;}
+</style>
+
+<div class="page">
+
+  <div class="eyebrow">Nabati Food · IT Help Desk · Flow ITHD-01</div>
+  <h1>Ticket Assignment &amp; Absence Routing</h1>
+  <p class="subhead">What happens to a new IT ticket from the moment it's created, through Manual or Auto assignment, and how the flow reacts when the people involved are out of office.</p>
+  <div class="meta-row">
+    <span class="pill status-done">Manual-mode branch — built &amp; tested</span>
+    <span class="pill status-done">Auto-mode branch — built &amp; tested</span>
+    <span class="pill status-done">ActingApprover — built &amp; live</span>
+  </div>
+
+  <figure>
+    <div class="diagram-scroll">
+<svg viewBox="-20 -10 1340 1300" role="img" aria-label="Flowchart: a new ticket checks AssignmentMode. Manual mode sends an approval card to the ActingApprover if set, otherwise the Manager, who picks Nikko, Tristan, or JP. Auto mode checks, in order, whether both Assistants are out (escalate to Manager), whether Tristan is out (assign JP), whether JP is out (assign Tristan), then compares open ticket counts, alternating on a tie using LastAssignedTo.">
+
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+    </marker>
+  </defs>
+
+  <!-- shared top -->
+  <g color="var(--ink-soft)">
+    <rect x="560" y="12" width="280" height="56" rx="10" fill="var(--surface)" stroke="var(--ink-soft)" stroke-width="1.5"/>
+    <text x="700" y="45" text-anchor="middle" class="box-text">New ticket needs assignment</text>
+
+    <line x1="700" y1="68" x2="700" y2="108" stroke="currentColor" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+    <polygon points="700,108 850,170 700,232 550,170" fill="var(--surface)" stroke="var(--ink-soft)" stroke-width="1.5"/>
+    <text x="700" y="165" text-anchor="middle" class="diamond-text">AssignmentMode?</text>
+    <text x="700" y="182" text-anchor="middle" class="small-label" fill="var(--ink-faint)">Ticket Settings</text>
+
+    <!-- elbow to manual -->
+    <line x1="550" y1="170" x2="280" y2="170" stroke="currentColor" stroke-width="1.5"/>
+    <line x1="280" y1="170" x2="280" y2="278" stroke="currentColor" stroke-width="1.5" marker-end="url(#arrow)"/>
+    <text x="415" y="160" text-anchor="middle" class="small-label">Manual</text>
+
+    <!-- elbow to auto -->
+    <line x1="850" y1="170" x2="900" y2="170" stroke="currentColor" stroke-width="1.5"/>
+    <line x1="900" y1="170" x2="900" y2="238" stroke="currentColor" stroke-width="1.5" marker-end="url(#arrow)"/>
+    <text x="878" y="160" text-anchor="middle" class="small-label">Auto</text>
+  </g>
+
+  <!-- MANUAL LANE -->
+  <g color="var(--ink-soft)">
+    <text x="280" y="255" text-anchor="middle" class="lane-label" fill="var(--flow)">MANUAL</text>
+
+    <polygon points="280,285 410,340 280,395 150,340" fill="var(--surface)" stroke="var(--ink-soft)" stroke-width="1.5"/>
+    <text x="280" y="336" text-anchor="middle" class="diamond-text">ActingApprover</text>
+    <text x="280" y="352" text-anchor="middle" class="diamond-text">set?</text>
+
+    <!-- yes -> ActingApprover -->
+    <line x1="180" y1="360" x2="150" y2="420" stroke="currentColor" stroke-width="1.5" marker-end="url(#arrow)"/>
+    <text x="140" y="392" text-anchor="middle" class="small-label">Yes</text>
+    <rect x="45" y="452" width="200" height="58" rx="10" fill="var(--surface)" stroke="var(--ink-soft)" stroke-width="1.5"/>
+    <text x="145" y="476" text-anchor="middle" class="box-text">Card goes to</text>
+    <text x="145" y="495" text-anchor="middle" class="box-text">ActingApprover</text>
+
+    <!-- no -> Manager -->
+    <line x1="380" y1="360" x2="410" y2="420" stroke="currentColor" stroke-width="1.5" marker-end="url(#arrow)"/>
+    <text x="415" y="392" text-anchor="middle" class="small-label">No</text>
+    <rect x="310" y="452" width="210" height="58" rx="10" fill="var(--surface)" stroke="var(--ink-soft)" stroke-width="1.5"/>
+    <text x="415" y="476" text-anchor="middle" class="box-text">Card goes to Manager</text>
+    <text x="415" y="495" text-anchor="middle" class="box-text">(Charles)</text>
+
+    <!-- converge -->
+    <line x1="145" y1="510" x2="145" y2="545" stroke="currentColor" stroke-width="1.5"/>
+    <line x1="415" y1="510" x2="415" y2="545" stroke="currentColor" stroke-width="1.5"/>
+    <line x1="145" y1="545" x2="415" y2="545" stroke="currentColor" stroke-width="1.5"/>
+    <line x1="280" y1="545" x2="280" y2="578" stroke="currentColor" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+    <rect x="140" y="580" width="280" height="76" rx="10" fill="var(--surface)" stroke="var(--ink-soft)" stroke-width="1.5"/>
+    <text x="280" y="606" text-anchor="middle" class="box-text">Approver taps Nikko,</text>
+    <text x="280" y="625" text-anchor="middle" class="box-text">Tristan, or JP — card shows</text>
+    <text x="280" y="644" text-anchor="middle" class="box-text">who's currently out</text>
+
+    <line x1="280" y1="656" x2="280" y2="694" stroke="currentColor" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+    <rect x="155" y="696" width="250" height="58" rx="10" fill="var(--flow-soft)" stroke="var(--flow)" stroke-width="1.5"/>
+    <text x="280" y="720" text-anchor="middle" class="box-text">Write Assigned To +</text>
+    <text x="280" y="739" text-anchor="middle" class="box-text">Status: Assigned</text>
+
+    <line x1="280" y1="754" x2="280" y2="784" stroke="currentColor" stroke-width="1.5" marker-end="url(#arrow)"/>
+    <text x="280" y="806" text-anchor="middle" class="end-text">Sits in that person's queue</text>
+    <text x="280" y="822" text-anchor="middle" class="end-text">until they act</text>
+  </g>
+
+  <!-- AUTO LANE -->
+  <g color="var(--ink-soft)">
+    <text x="900" y="216" text-anchor="middle" class="lane-label" fill="var(--flow)">AUTO — ROUND ROBIN (ASSISTANTS ONLY)</text>
+
+    <!-- diamond 1: both out -->
+    <polygon points="900,240 1040,300 900,360 760,300" fill="var(--surface)" stroke="var(--ink-soft)" stroke-width="1.5"/>
+    <text x="900" y="296" text-anchor="middle" class="diamond-text">Both Assistants</text>
+    <text x="900" y="312" text-anchor="middle" class="diamond-text">out?</text>
+
+    <line x1="1040" y1="300" x2="1060" y2="300" stroke="var(--escalation)" stroke-width="1.5" marker-end="url(#arrow)"/>
+    <text x="1050" y="288" text-anchor="middle" class="small-label" fill="var(--escalation)">Yes</text>
+    <rect x="1060" y="270" width="220" height="60" rx="10" fill="var(--escalation-soft)" stroke="var(--escalation)" stroke-width="1.5"/>
+    <text x="1170" y="294" text-anchor="middle" class="box-text">Assign to Manager (or</text>
+    <text x="1170" y="313" text-anchor="middle" class="box-text">ActingApprover) + FYI card</text>
+
+    <line x1="900" y1="360" x2="900" y2="398" stroke="currentColor" stroke-width="1.5" marker-end="url(#arrow)"/>
+    <text x="920" y="384" text-anchor="middle" class="small-label">No</text>
+
+    <!-- diamond 2: tristan out -->
+    <polygon points="900,400 1030,458 900,516 770,458" fill="var(--surface)" stroke="var(--ink-soft)" stroke-width="1.5"/>
+    <text x="900" y="462" text-anchor="middle" class="diamond-text">Tristan out?</text>
+
+    <line x1="1030" y1="458" x2="1060" y2="458" stroke="currentColor" stroke-width="1.5" marker-end="url(#arrow)"/>
+    <text x="1045" y="446" text-anchor="middle" class="small-label">Yes</text>
+    <rect x="1060" y="430" width="220" height="56" rx="10" fill="var(--surface)" stroke="var(--ink-soft)" stroke-width="1.5"/>
+    <text x="1170" y="463" text-anchor="middle" class="box-text">Assign to JP</text>
+
+    <line x1="900" y1="516" x2="900" y2="554" stroke="currentColor" stroke-width="1.5" marker-end="url(#arrow)"/>
+    <text x="920" y="540" text-anchor="middle" class="small-label">No</text>
+
+    <!-- diamond 3: jp out -->
+    <polygon points="900,556 1030,614 900,672 770,614" fill="var(--surface)" stroke="var(--ink-soft)" stroke-width="1.5"/>
+    <text x="900" y="618" text-anchor="middle" class="diamond-text">JP out?</text>
+
+    <line x1="1030" y1="614" x2="1060" y2="614" stroke="currentColor" stroke-width="1.5" marker-end="url(#arrow)"/>
+    <text x="1045" y="602" text-anchor="middle" class="small-label">Yes</text>
+    <rect x="1060" y="586" width="220" height="56" rx="10" fill="var(--surface)" stroke="var(--ink-soft)" stroke-width="1.5"/>
+    <text x="1170" y="619" text-anchor="middle" class="box-text">Assign to Tristan</text>
+
+    <line x1="900" y1="672" x2="900" y2="710" stroke="currentColor" stroke-width="1.5" marker-end="url(#arrow)"/>
+    <text x="928" y="696" text-anchor="middle" class="small-label">Neither out</text>
+
+    <!-- diamond 4: tristan fewer -->
+    <polygon points="900,712 1030,772 900,832 770,772" fill="var(--surface)" stroke="var(--ink-soft)" stroke-width="1.5"/>
+    <text x="900" y="768" text-anchor="middle" class="diamond-text">Tristan has fewer</text>
+    <text x="900" y="784" text-anchor="middle" class="diamond-text">open tickets?</text>
+
+    <line x1="1030" y1="772" x2="1060" y2="772" stroke="currentColor" stroke-width="1.5" marker-end="url(#arrow)"/>
+    <text x="1045" y="760" text-anchor="middle" class="small-label">Yes</text>
+    <rect x="1060" y="744" width="220" height="56" rx="10" fill="var(--surface)" stroke="var(--ink-soft)" stroke-width="1.5"/>
+    <text x="1170" y="777" text-anchor="middle" class="box-text">Assign to Tristan</text>
+
+    <line x1="900" y1="832" x2="900" y2="870" stroke="currentColor" stroke-width="1.5" marker-end="url(#arrow)"/>
+    <text x="920" y="856" text-anchor="middle" class="small-label">No</text>
+
+    <!-- diamond 5: jp fewer -->
+    <polygon points="900,872 1030,932 900,992 770,932" fill="var(--surface)" stroke="var(--ink-soft)" stroke-width="1.5"/>
+    <text x="900" y="928" text-anchor="middle" class="diamond-text">JP has fewer</text>
+    <text x="900" y="944" text-anchor="middle" class="diamond-text">open tickets?</text>
+
+    <line x1="1030" y1="932" x2="1060" y2="932" stroke="currentColor" stroke-width="1.5" marker-end="url(#arrow)"/>
+    <text x="1045" y="920" text-anchor="middle" class="small-label">Yes</text>
+    <rect x="1060" y="904" width="220" height="56" rx="10" fill="var(--surface)" stroke="var(--ink-soft)" stroke-width="1.5"/>
+    <text x="1170" y="937" text-anchor="middle" class="box-text">Assign to JP</text>
+
+    <line x1="900" y1="992" x2="900" y2="1015" stroke="currentColor" stroke-width="1.5"/>
+    <line x1="900" y1="1015" x2="1060" y2="1015" stroke="currentColor" stroke-width="1.5"/>
+    <line x1="1060" y1="1015" x2="1170" y2="1015" stroke="currentColor" stroke-width="1.5" marker-end="url(#arrow)"/>
+    <text x="935" y="1005" text-anchor="middle" class="small-label">Tied</text>
+    <rect x="1060" y="988" width="220" height="30" rx="8" fill="var(--surface)" stroke="var(--ink-soft)" stroke-width="1" opacity="0"/>
+
+    <!-- tied outcome box, joins trunk -->
+    <rect x="1060" y="1040" width="220" height="70" rx="10" fill="var(--surface)" stroke="var(--ink-soft)" stroke-width="1.5"/>
+    <text x="1170" y="1063" text-anchor="middle" class="box-text">Tied — alternate:</text>
+    <text x="1170" y="1082" text-anchor="middle" class="box-text">whoever wasn't</text>
+    <text x="1170" y="1101" text-anchor="middle" class="box-text">LastAssignedTo</text>
+
+    <line x1="1170" y1="1015" x2="1170" y2="1040" stroke="currentColor" stroke-width="1.5"/>
+
+    <!-- trunk collecting all outcome boxes -->
+    <line x1="1170" y1="330" x2="1170" y2="1148" stroke="var(--ink-faint)" stroke-width="1.25" stroke-dasharray="2 4"/>
+
+    <line x1="1170" y1="1148" x2="1170" y2="1180" stroke="currentColor" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+    <rect x="1030" y="1182" width="280" height="72" rx="10" fill="var(--flow-soft)" stroke="var(--flow)" stroke-width="1.5"/>
+    <text x="1170" y="1208" text-anchor="middle" class="box-text">Write Assigned To + Status:</text>
+    <text x="1170" y="1227" text-anchor="middle" class="box-text">Assigned, update</text>
+    <text x="1170" y="1246" text-anchor="middle" class="box-text">LastAssignedTo</text>
+
+  </g>
+
+</svg>
+    </div>
+    <figcaption>Auto mode checks the Assistants in order — both out escalates to the Manager, one out gives it straight to the other, and if neither is out it compares each Assistant's current open-ticket count, alternating on a tie using the setting's <code style="font-family:'IBM Plex Mono',monospace;background:var(--mono-chip);padding:1px 6px;border-radius:4px;">LastAssignedTo</code> field. Nikko, the Specialist, is never part of Auto — he's manual-assignment only.</figcaption>
+  </figure>
+
+  <div class="section-title">Two settings that change this</div>
+  <div class="settings-grid">
+    <div class="setting-card">
+      <span class="field">AssignmentMode</span>
+      <h3>Manual or Auto</h3>
+      <p>A Choice field on Ticket Settings. Switches every new ticket between "send an approval card" and "round-robin the Assistants automatically."</p>
+      <div class="who">Changed by: <b>Charles</b>, or whoever's covering while he's out — e.g. flipped to Auto before a planned leave.</div>
+    </div>
+    <div class="setting-card">
+      <span class="field">ActingApprover</span>
+      <h3>Delegate the approval card</h3>
+      <p>A Person field on Ticket Settings. When set, Manual-mode cards go here instead of the Manager — via <code style="font-family:'IBM Plex Mono',monospace;background:var(--mono-chip);padding:1px 6px;border-radius:4px;">coalesce(ActingApprover, ManualAssignmentApprover)</code>. Left blank the rest of the time.</p>
+      <div class="who">Changed by: <b>whoever covers Charles's absence</b> — set it to themselves (or the Specialist) when he leaves, cleared when he's back. Whoever's delegated never has to hand it back themselves.</div>
+    </div>
+  </div>
+
+  <div class="section-title">Already handled, no extra logic needed</div>
+  <div class="covered-list">
+    <div class="covered-item">
+      <div class="who">Nikko is out</div>
+      <div class="what">Auto never touches him regardless — he's manual-only by design. In Manual mode, the approval card already lists who's currently out, so Charles simply won't tap his button. If he does anyway, the ticket just sits assigned to Nikko until he's back.</div>
+    </div>
+    <div class="covered-item">
+      <div class="who">Tristan or JP alone is out</div>
+      <div class="what">The diamond ladder above catches this automatically — whichever Assistant is out gets skipped, and the ticket goes straight to the other one.</div>
+    </div>
+    <div class="covered-item">
+      <div class="who">An Assistant is assigned something anyway</div>
+      <div class="what">If someone out of office still receives a ticket (a manual pick, or they return to a backlog), it stays visible in their queue — that's the intended behavior, not a bug to route around.</div>
+    </div>
+  </div>
+
+  <footer>
+    Reflects Flow <code>ITHD-01 — New Ticketing Routing</code> as built and tested as of Sep 10, 2026. Both the Manual-mode branch and the full Auto-mode diamond ladder above are built and tested end-to-end, including all three Auto-mode sub-paths (both Assistants available, one out, both out). <code>ActingApprover</code> is built and in active use. Full build notes, every expression, and every issue hit along the way live in <code>flow-1-ticket-routing.md</code>.
+  </footer>
+
+</div>
