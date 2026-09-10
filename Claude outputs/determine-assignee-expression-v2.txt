@@ -1,0 +1,25 @@
+if(
+  and(outputs('Compose_-_Is_Tristan_Out'), outputs('Compose_-_Is_JP_Out')),
+  items('Apply_to_each')?['ManualAssignmentApprover']?['Email'],
+  if(
+    outputs('Compose_-_Is_Tristan_Out'),
+    'jp.villacorta@nabatifood.com.ph',
+    if(
+      outputs('Compose_-_Is_JP_Out'),
+      'tristan.tan@nabatifood.com.ph',
+      if(
+        less(variables('TristanOpenCount'), variables('JPOpenCount')),
+        'tristan.tan@nabatifood.com.ph',
+        if(
+          less(variables('JPOpenCount'), variables('TristanOpenCount')),
+          'jp.villacorta@nabatifood.com.ph',
+          if(
+            equals(items('Apply_to_each')?['LastAssignedTo']?['Email'], 'tristan.tan@nabatifood.com.ph'),
+            'jp.villacorta@nabatifood.com.ph',
+            'tristan.tan@nabatifood.com.ph'
+          )
+        )
+      )
+    )
+  )
+)

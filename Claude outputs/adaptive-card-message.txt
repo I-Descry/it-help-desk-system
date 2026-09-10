@@ -1,0 +1,65 @@
+{
+  "type": "AdaptiveCard",
+  "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+  "version": "1.4",
+  "body": [
+    {
+      "type": "TextBlock",
+      "text": "New IT Ticket - Needs Assignment",
+      "weight": "Bolder",
+      "size": "Medium",
+      "wrap": true
+    },
+    {
+      "type": "FactSet",
+      "facts": [
+        { "title": "Ticket ID:", "value": "@{triggerOutputs()?['body/TicketID']}" },
+        { "title": "Subject:", "value": "@{triggerOutputs()?['body/Title']}" },
+        { "title": "Category:", "value": "@{outputs('Compose_-_Category')}" },
+        { "title": "Priority:", "value": "@{outputs('Compose_-_Priority')}" },
+        { "title": "Submitted by:", "value": "@{triggerOutputs()?['body/Author']}" }
+      ]
+    },
+    {
+      "type": "TextBlock",
+      "text": "Description:",
+      "weight": "Bolder",
+      "wrap": true
+    },
+    {
+      "type": "TextBlock",
+      "text": "@{triggerOutputs()?['body/Description']}",
+      "wrap": true
+    },
+    {
+      "type": "TextBlock",
+      "text": "Currently out of office: @{outputs('Compose_-_Out_of_Office_List')}",
+      "wrap": true,
+      "isSubtle": true,
+      "spacing": "Medium"
+    },
+    {
+      "type": "TextBlock",
+      "text": "Assign this ticket to:",
+      "weight": "Bolder",
+      "spacing": "Medium"
+    }
+  ],
+  "actions": [
+    {
+      "type": "Action.Submit",
+      "title": "Nikko (Specialist)",
+      "data": { "assignee": "johnnikko.alvarez@nabatifood.com.ph", "assigneeName": "John Nikko Alvarez" }
+    },
+    {
+      "type": "Action.Submit",
+      "title": "Tristan (Assistant)",
+      "data": { "assignee": "tristan.tan@nabatifood.com.ph", "assigneeName": "Tristan Railey Tan" }
+    },
+    {
+      "type": "Action.Submit",
+      "title": "JP (Assistant)",
+      "data": { "assignee": "jp.villacorta@nabatifood.com.ph", "assigneeName": "John Paul Villacorta" }
+    }
+  ]
+}

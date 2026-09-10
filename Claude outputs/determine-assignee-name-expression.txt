@@ -1,0 +1,9 @@
+if(
+  equals(outputs('Compose_-_Determine_Assignee'), 'tristan.tan@nabatifood.com.ph'),
+  'Tristan Railey Tan',
+  if(
+    equals(outputs('Compose_-_Determine_Assignee'), 'jp.villacorta@nabatifood.com.ph'),
+    'John Paul Villacorta',
+    items('Apply_to_each')?['ManualAssignmentApprover DisplayName']
+  )
+)

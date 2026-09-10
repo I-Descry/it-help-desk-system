@@ -1,0 +1,9 @@
+concat(
+'{"type":"AdaptiveCard","$schema":"http://adaptivecards.io/schemas/adaptive-card.json","version":"1.4","body":[{"type":"TextBlock","text":"Auto-assigned to you - both Assistants are currently out of office","weight":"Bolder","size":"Medium","wrap":true},{"type":"FactSet","facts":[{"title":"Ticket ID:","value":"',
+outputs('Compose_-_Ticket_ID'),
+'"},{"title":"Subject:","value":"',
+triggerOutputs()?['body/Title'],
+'"},{"title":"Assigned To:","value":"',
+outputs('Compose_-_Determine_Assignee_Name'),
+'"}]},{"type":"TextBlock","text":"This will stay in your queue until one of them is back, unless you reassign it.","wrap":true,"isSubtle":true,"spacing":"Medium"}]}'
+)
